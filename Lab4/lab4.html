@@ -1,0 +1,142 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec3 vPosition;
+attribute vec3 vColor;
+varying vec4 color;
+
+uniform mat4 modelView;
+uniform mat4 projection;
+
+uniform vec3 rTheta;
+
+
+void
+main()
+{
+    //Some part of code and some concepts come from perspective.html, cube.html, piazza and
+    //http://learningwebgl.com/
+    //http://www.lighthouse3d.com/
+    //http://www.videotutorialsrock.com/opengl_tutorial
+	
+	 // Compute the sines and cosines of theta for each of
+    //   the three axes in one computation.
+    vec3 angles = radians( rTheta );
+    vec3 c = cos( angles );
+    vec3 s = sin( angles );
+    
+
+    // Remember: these matrices are column-major
+    mat4 rx = mat4( 1.0,  0.0,  0.0, 0.0,
+					0.0,  c.x,  -s.x, 0.0,
+					0.0, s.x,  c.x, 0.0,
+					0.0,  0.0,  0.0, 1.0 );
+
+    mat4 ry = mat4( c.y, 0.0, -s.y, 0.0,
+					0.0, 1.0,  0.0, 0.0,
+					s.y, 0.0,  c.y, 0.0,
+					0.0, 0.0,  0.0, 1.0 );
+
+
+    mat4 rz = mat4( c.z, -s.z, 0.0, 0.0,
+					s.z,  c.z, 0.0, 0.0,
+					0.0,  0.0, 1.0, 0.0,
+					0.0,  0.0, 0.0, 1.0 );
+
+    //fColor = vColor;
+	//gl_Position = rz * ry * rx * vPosition;
+    
+    gl_Position = projection * modelView * rz * ry * rx * vec4(vPosition, 1.0 );
+    color = vec4(vColor, .8);
+}
+</script>
+
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+   
+varying vec4 color;
+
+void
+main()
+{
+    gl_FragColor = color;
+}
+</script>
+
+<script id="pVertex-shader" type="x-shader/x-vertex">
+attribute vec3 pPosition;
+attribute vec3 pColor;
+varying vec4 color;
+/*
+    float s = sin( rTheta );
+    float c = cos( rTheta );
+
+    gl_Position.x = -s * vPosition.x + c * vPosition.y;
+    gl_Position.y =  s * vPosition.y + c * vPosition.x;
+    gl_Position.z = 0.0;
+    gl_Position.w = 1.0;
+*/
+
+uniform mat4 modelView;
+uniform mat4 projection;
+uniform vec3 theta;
+
+void main(){
+	
+	//gl_Position = projection * modelView;
+	gl_Position = projection * modelView * vec4(pPosition, 1.0);
+	color = vec4(pColor, 1.0);
+}
+</script>
+
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="lab4.js"></script>
+<script type="text/javascript" src="honolulu4.js"></script>
+</head>   
+
+<body>
+<div>
+<h3>Field of View:</h3>
+Narrow <input id="slider" type="range"
+ min="1" max="179" step="1" value="65" /> Wide <!-- image flips every 180 degree. -->
+ </br>
+ </br>
+<button type="button" id = "Randomize">Randomize the Terrain</button>
+<button type="button" id="Hawaii">Hawaii Terrain</button>
+<button type="button" id="Gold">Heaven</button>
+
+
+<!--
+<select id="terrain" size="3">
+    <option value="0"> Normal Terrain </option>
+    <option value="1"> Hawaiian Terrain </option>
+    <option value="2"> Gold Terrain </option>
+</select>
+    -->
+</br>
+</br>
+<b> Translate: </b> Left-click on the gasket to move it around.
+</br>
+<b> Rotate: </b> Right-click on the gasket and drag to rotate it.
+<br />
+<b> Camera Rotation: </b> Hold Ctrl and left click on canvas to move and rotate the camera. Vertical rotation is inverted.
+</br>
+</br>
+<button type="button" onclick="location.reload();">Start Over!</button></div>
+</br>
+</br>
+</div>
+
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>

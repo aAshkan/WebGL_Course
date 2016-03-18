@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>Rotating Square</title>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+varying vec4 colorDistribution;
+uniform float xoffset, yoffset;
+
+void
+main()
+{
+/*
+    float s = sin( theta );
+    float c = cos( theta );
+
+    gl_Position.x = -s * vPosition.x + c * vPosition.y;
+    gl_Position.y =  s * vPosition.y + c * vPosition.x;
+    gl_Position.z = 0.0;
+    gl_Position.w = 1.0;
+*/
+	gl_Position.x = vPosition.x + xoffset;
+    gl_Position.y = vPosition.y + yoffset;
+    gl_Position.z = 0.0;
+    gl_Position.w = 1.0;
+	
+	colorDistribution = vPosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+varying vec4 colorDistribution;
+uniform float red, green, blue;
+
+void
+main()
+{
+	gl_FragColor = vec4( 0.0+red, 0.0+green, 0.0+blue, 1.0);
+}
+</script>
+
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="rotatingSquare3.js"></script>
+</head>   
+
+<body>
+<div>
+
+<!-- speed 0% <input id="slider" type="range"
+ min="0" max="100" step="10" value="50" />
+ 100%
+ -->
+<div>
+	<h3>Change Color: </h3>Press "R", "G", or "B" to change the color.
+	<h3>Stamp Mode (A.K.A. Paintbrush mode): </h3>Press "S" to toggle stamp mode. On mouse up it will create a mini gasket</br>Dragging gasket is disabled in this mode. </br>
+</div>
+ Subdivide: 1 <input id="slider" type="range"
+ min="1" max="7" step="1" value="3" />
+ 7
+</div>
+<button type="button" onclick="location.reload();">Back to Default!</button></div>
+</br>
+<div>
+<h4> Can you guess the number of small triangles pointing upward?</h4>
+<input type="text" id="triCalc" name="guess" value="I don't know"><button type="button" onclick="triCalculator();">is my guess!</button>
+</div>
+
+
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>

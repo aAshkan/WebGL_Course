@@ -1,0 +1,178 @@
+
+	<!--
+	//Some part of code and some concepts come from perspective.html, cube.html, 
+	//shadedCube.html, shadedSphere, piazza and
+    //http://learningwebgl.com/
+    //http://www.lighthouse3d.com/
+    //http://www.videotutorialsrock.com/opengl_tutorial
+	-->
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+attribute  vec4 vColor;
+attribute  vec2 vTexCoord;
+varying vec3 N, L, E;
+varying vec4 color;
+varying vec4 fColor;
+varying vec2 fTexCoord;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+uniform vec3 rTheta;
+
+
+
+
+void main()
+{
+
+    vec3 pos = -(modelViewMatrix * vPosition).xyz;
+    vec3 light = lightPosition.xyz;
+    L = normalize( light - pos );
+    E =  -pos;
+    N = normalize( (modelViewMatrix*vNormal).xyz);
+    //gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    vec3 angles = radians( rTheta );
+    vec3 c = cos( angles );
+    vec3 s = sin( angles );
+    
+
+    // Remember: these matrices are column-major
+    mat4 rx = mat4( 1.0,  0.0,  0.0, 0.0,
+					0.0,  c.x,  -s.x, 0.0,
+					0.0, s.x,  c.x, 0.0,
+					0.0,  0.0,  0.0, 1.0 );
+
+    mat4 ry = mat4( c.y, 0.0, -s.y, 0.0,
+					0.0, 1.0,  0.0, 0.0,
+					s.y, 0.0,  c.y, 0.0,
+					0.0, 0.0,  0.0, 1.0 );
+
+
+    mat4 rz = mat4( c.z, -s.z, 0.0, 0.0,
+					s.z,  c.z, 0.0, 0.0,
+					0.0,  0.0, 1.0, 0.0,
+					0.0,  0.0, 0.0, 1.0 );
+
+    //fColor = vColor;
+	//gl_Position = rz * ry * rx * vPosition;
+    fColor = vColor;   
+	fTexCoord = vTexCoord;
+    gl_Position = projectionMatrix * modelViewMatrix * rz * ry * rx * vec4(vPosition );
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+uniform vec4 ambientProduct;
+uniform vec4 diffuseProduct;
+uniform vec4 specularProduct;
+uniform float shininess;
+uniform sampler2D texture;
+uniform bool colors;
+uniform bool on;
+varying vec3 N, L, E;
+varying  vec4 color;
+varying  vec2 fTexCoord;
+
+
+void main()
+{    
+    vec4 fColor;
+    
+    vec3 H = normalize( L + E );
+    vec4 ambient = ambientProduct;
+
+    float Kd = max( dot(L, N), 0.0 );
+    vec4  diffuse = Kd*diffuseProduct;
+
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4  specular = Ks * specularProduct;
+    
+    if( dot(L, N) < 0.0 ) specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+    fColor = ambient + diffuse +specular;
+	
+	if (colors ){
+    	fColor += color;
+    }
+	//document.getElementById("on").onchange = function(event) {
+		//on = event.target.value;
+	//};
+	
+    if (on){
+    	fColor = color;
+    }
+   //else if (!on)
+		//gl_FragColor = fColor * texture2D( texture, fTexCoord );	
+	
+    fColor.a = 1.0;
+	//if ( document.getElementById( "texturerr" ) )	
+    //gl_FragColor = fColor ;//* texture2D( texture, fTexCoord );
+	//else
+		//gl_FragColor = fColor * texture2D( texture, fTexCoord );
+		
+		//    document.getElementById("on").onclick = function () {
+		//if (on)
+			//on = 0;
+		//else
+			//on = 1; 
+	gl_FragColor = fColor ;
+
+}
+</script>
+<p> </p>
+<button id = "Button0">Increase R</button>
+<button id = "Button1">Decrease R</button>
+
+<p> </p>
+<button id = "Button2">Increase theta</button>
+<button id = "Button3">Decrease theta</button>
+<button id = "Button4">Increase phi</button>
+<button id = "Button5">Decrease phi</button>
+<p> </p>
+<button id = "Button6">Increase Subdivisions</button>
+<button id = "Button7">Decrease Subdivisions</button>
+<p> </p>
+<button id = "lightX">light Right</button>
+<button id = "sLightX">light Left</button>
+<button id = "lightY">light Up</button>
+<button id = "sLightY">light Down</button>
+<button id = "lightZ">light Out</button>
+<button id = "sLightZ">light In</button>
+
+<button id="on"> Light On </button>
+<button onclick="location.reload()"> Light Off </button>
+
+<!--
+<form>
+<input type="radio" id="texturerr" name="texturerr" value="on">With Texture<br>
+<input type="radio" id="texturerr" name="texturerr" value="off">Without Texture
+</form>
+	-->
+<h5>Hold Ctrl and left-click to rotate the sphere/camera</h5>
+
+<p></p>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="Lab5.js"></script>
+<!--
+<script type="text/javascript" src="./Moons_files/shims.js"></script>
+<script type="text/javascript" src="./Moons_files/gl-matrix-min.js"></script>
+<script type="text/javascript" src="./Moons_files/gl-utils.min.js"></script>
+	-->
+<img id = "texImage" src = "chessboard.gif" hidden>></img>
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>

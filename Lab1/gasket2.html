@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>2D Sierpinski Gasket</title>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+varying vec4 colorDistribution;
+
+void
+main()
+{
+    gl_Position = vPosition;
+    colorDistribution = vPosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 colorDistribution;
+
+void
+main()
+{
+  
+ if (colorDistribution[1] > 0.75) { //snow
+    gl_FragColor = vec4(1,1,1,.3);
+	return;
+	}
+	
+	else if(colorDistribution[1] > 0.0 ) { //middle of mountain
+	   gl_FragColor = vec4( .6, .8, 0, .9 );
+	return;
+	}
+	
+	else
+    gl_FragColor = vec4( 0.6, 1.0, 0.3, 0.87); //grass
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="gasket2.js"></script>
+</head>
+
+<body>
+<canvas id="gl-canvas" width="960" height="540">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
